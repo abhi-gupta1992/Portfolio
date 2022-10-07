@@ -1,0 +1,83 @@
+install.packages("tidyverse")
+install.packages("janitor")
+install.packages("lubridate")
+install.packages("readxl")
+install.packages("writexl")
+
+
+library(tidyverse)
+library(janitor)
+library(lubridate)
+library(readxl)
+library(writexl)
+
+
+
+
+# Converting excel data into data frames (11). 
+
+df1 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t1.csv")
+df2 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t2.csv")
+df3 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t3.csv")
+df4 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t4.csv")
+df5 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t5.csv")
+df6 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t6.csv")
+df7 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t7.csv")
+df8 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t8.csv")
+df9 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t9.csv")
+df10 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t10.csv")
+df11 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t11.csv")
+df12 <- read.csv("C:\\Users\\abhig\\onedrive\\documents\\data\\Cyclist Bike Share Analysis\\Cyclist Bike Share Data\\t12.csv")
+
+# Combining 11 dataframes into 1 --> bike_rides
+
+bike_rides <- rbind(df1,df2,df3,df4,df5,df6,df7,df8,df9,df10,df11,df12)
+
+
+
+# Cleaning the newly created dataframe and removing empty rows and coloumns.  
+
+bike_rides <- janitor::remove_empty(bike_rides,which = c("cols"))
+bike_rides <- janitor::remove_empty(bike_rides,which = c("rows"))
+
+bike_rides <- clean_names(bike_rides)
+
+remove_empty(clean_names, which = c())
+
+bike_rides$day_of_week <- wday(bike_rides$started_at, label = T, abbr = T)
+
+bike_rides$starting_hour <- format(as.POSIXct(bike_rides$started_at), '%H')
+
+bike_rides$month <- format(as.Date(bike_rides$started_at), '%m')
+
+
+bike_rides$trip_duration <- difftime(bike_rides$ended_at, bike_rides$started_at, units ='sec')
+
+bike_rides1 <- bike_rides[!(bike_rides$trip_duration<=0),]
+
+
+##write.csv(bike_rides1, file ='Cyclistic_df.csv')
+
+install.packages("ggplot")
+
+options(scipen = 999)
+ggplot(data = bike_rides1) +
+  aes(x = day_of_week, fill = member_casual) +
+  geom_bar(position = 'dodge') +
+  labs(x = 'Day of week', y = 'Number of rides', fill = 'Member type', title = 'Number of rides by member type')
+ggsave("number_of_rides_by_member_type.png")
+
+
+ggplot(data = bike_rides1) +
+  aes(x = month, fill = member_casual) +
+  geom_bar(position = 'dodge') +
+  labs(x = 'Month', y = 'Number of rides', fill = 'Member type', title = 'Number of rides per month')
+ggsave("number_of_rides_per_month.png")
+
+ggplot(data = bike_rides1) +
+  aes(x = starting_hour, fill = member_casual) +
+  facet_wrap(~day_of_week) +
+  geom_bar() +
+  labs(x = 'Starting hour', y = 'Number of rides', fill = 'Member type', title = 'Hourly use of bikes throughout the week') +
+  theme(axis.text = element_text(size = 5))
+ggsave("Hourly_use_of_bikes_throughout_the_week.png", dpi = 1000)
