@@ -1,0 +1,28 @@
+SELECT * 
+FROM [Portfolio Project]..coviddeaths
+order by 3,4
+
+SELECT * 
+FROM [Portfolio Project]..['covid vaccinations$']
+order by 3,4
+
+	Select Location, date, total_cases, new_cases,total_deaths, population
+	FROM [Portfolio Project]..coviddeaths
+	order by 1,2
+
+-- looking at total cases vs total deaths in germany 
+-- shows the likelihood of dying if you get covid
+
+Select Location, date, total_cases, total_deaths, (total_deaths/total_cases)*100 as DeathPercentage
+	FROM [Portfolio Project]..coviddeaths
+	Where location like '%germany%'
+	order by 1,2
+
+-- Looking at the total cases vs population 
+-- Shows the percentage of population infected by covid
+
+Select Location, date, population, total_cases, (total_cases/population)*100 as InfectionPercentage
+	FROM [Portfolio Project]..coviddeaths
+	-- Where location like '%germany%'
+	order by 1,2
+
